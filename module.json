@@ -1,0 +1,14 @@
+{
+    "name": "Esia",
+    "alias": "esia",
+    "image": "/modules/esia/img/esia.png",
+    "description": "",
+    "keywords": [],
+    "order": 0,
+    "providers": [
+        "Modules\\Esia\\Providers\\EsiaServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
