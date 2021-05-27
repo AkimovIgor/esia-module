@@ -71,7 +71,7 @@ class EsiaServiceProvider extends ServiceProvider
                     'privateKeyPassword' => $config->get('esia.privateKeyPassword'),
                     'tmpPath' => $config->get('esia.tmpPath'),
                 ],
-                explode(',', $scopes),
+                array_map('trim', explode(',', $scopes)),
                 $config->get('esia.test')
             );
         });

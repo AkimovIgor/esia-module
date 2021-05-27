@@ -8,8 +8,8 @@ use Esia\Config;
 use Esia\OpenId;
 use Esia\Signer\SignerPKCS7;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
 use Ixudra\Curl\Facades\Curl;
+use Modules\Esia\Entities\EsiaAccount;
 
 class EsiaService
 {
@@ -19,15 +19,17 @@ class EsiaService
 
     private $errors;
 
-    public function __construct(array $config = [])
+    public function __construct(Request $request, array $config = [])
     {
         $config = array_merge_recursive($config, config('esia'));
-        $config['token'] = Session::get('esia_token');
-        $config['oid'] = Session::get('esia_oid');
+        $account = $this->getAccountByUser($request->header('Current-User'));
 
-        if (!$config['token'] || !$config['oid']) {
+        if (!$account) {
             throw new \Exception('Token mismatch');
         }
+
+        $config['token'] = $account->token;
+        $config['oid'] = $account->oid;
 
         $this->errors = require module_path('Esia', '/Resources/errors/esia_error_codes.php');
 
@@ -823,5 +825,10 @@ class EsiaService
 //        $result = array_merge($elements, $result);
 
         return $result;
+    }
+
+    private function getAccountByUser($userId)
+    {
+        return EsiaAccount::where('user_id', $userId)->first();
     }
 }

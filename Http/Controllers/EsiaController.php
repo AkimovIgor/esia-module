@@ -5,10 +5,7 @@ namespace Modules\Esia\Http\Controllers;
 
 
 use App\Http\Controllers\Controller;
-use Esia\Config;
-use Esia\OpenId;
 use Illuminate\Http\Request;
-use Laravel\Socialite\Facades\Socialite;
 use Modules\Esia\Services\EsiaService;
 
 class EsiaController extends Controller
@@ -18,10 +15,7 @@ class EsiaController extends Controller
     public function __construct(Request $request)
     {
         $config = [];
-        if ($request->has('scopes')) {
-            $config['scope'] = explode(',', $request->scopes);
-        }
-        $this->esiaService = new EsiaService($config);
+        $this->esiaService = new EsiaService($request, $config);
     }
 
     public function getContacts()

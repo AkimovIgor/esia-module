@@ -3,16 +3,12 @@
 
 namespace Modules\Esia\Http\Controllers;
 
-use App\Http\Controllers\Auth\LoginController as AppLoginController;
-
-use App\Services\Robots\RobotsService;
 use App\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
+use Modules\Esia\Entities\EsiaAccount;
 
 
 class EsiaLoginController
@@ -35,7 +31,7 @@ class EsiaLoginController
         try {
             $socUser = Socialite::driver('esia')->stateless()->user();
 
-            if (! $user = $this->checkUser($socUser->user['oid'])) {
+            if (! $user = $this->checkUser($socUser)) {
                 $user = $this->createNewUser($socUser);
             }
 
@@ -46,21 +42,39 @@ class EsiaLoginController
             return redirect()->to('/');
         }
 
-        Session::put('esia_token', $socUser->token);
-        Session::put('esia_oid', $socUser->id);
+        $request->session()->put('esia_oid', $socUser->id);
+
+        if (!$account = EsiaAccount::where('oid', $socUser->id)->first()) {
+            $account = new EsiaAccount([
+                'user_id' => $user->id,
+                'oid' => $socUser->id,
+                'token' => $socUser->token,
+            ]);
+            $account->save();
+        }
 
         return redirect()->to('/');
     }
 
-    protected function checkUser($userOid)
+    /**
+     * @param $socUser
+     * @return mixed
+     */
+    protected function checkUser($socUser)
     {
-        $email = $userOid . '@esia.org';
+        $email = $socUser->user['email'] ?? null;
+        $email = $email ?: $socUser->user['oid'] . '@esia.org';
         return User::where('email', $email)->first();
     }
 
+    /**
+     * @param $socUser
+     * @return User
+     */
     protected function createNewUser($socUser)
     {
-        $email = $socUser->user['oid'] . '@esia.org';
+        $email = $socUser->user['email'] ?? null;
+        $email = $email ?: $socUser->user['oid'] . '@esia.org';
         $password = $socUser->user['oid'] . Str::random(10);
         $firstName = $socUser->user['firstName'] ?? '';
         $lastName = $socUser->user['lastName'] ?? '';

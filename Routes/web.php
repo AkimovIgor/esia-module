@@ -19,10 +19,8 @@ if (Module::isEnabled('Esia')) {
 
     Route::group([], function () {
         Route::get('/esia/login/callback', 'EsiaLoginController@handleProviderCallback');
+
         Route::get('/esia/login', 'EsiaLoginController@redirectToProvider');
-//        Route::get('/esia/contacts', 'EsiaController@getContacts');
-//        Route::get('/esia/documents', 'EsiaController@getDocuments');
-//        Route::get('/esia/addresses', 'EsiaController@getAddresses');
 
         Route::match(
             ['get', 'post'],
